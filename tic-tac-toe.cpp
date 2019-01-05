@@ -31,31 +31,58 @@ class Board{
             cout << endl;
         }
     }
-
-    bool isRowFull(int row)
-    {
-      if(this->game_board[row][0] == this->game_board[row][1] == this->game_board[row][2] &&
-        this->game_board[row][0] != 0 && this->game_board[row][1] != 0 && this->game_board[row][2] != 0)
-        return true;
-      return false;
-    }
     
-    bool isFullColumnPresent()
+    bool isFullRowPresent()
     {
       for(int row = 0; row < 3; row++)
         if(this->isRowFull(row))
           return true;
       return false;
-      // for(int i=0; i<2; i++)
-      //   if(this->game_board[i][0] == this->game_board[i+1][0] != 0)
-      //     return true;
-      // for(int i=0; i<3; i++)
-      //   if(this->game_board[0][i] == this->game_board[0][i+1] != 0)
-      //     return true;
 
     }
 
-    
+    bool isRowFull(int row)
+    {
+      if(this->game_board[row][0] == this->game_board[row][1] &&
+          this->game_board[row][1] == this->game_board[row][2] &&
+          this->game_board[row][0] != 0 )
+        return true;
+      return false;
+    }
+
+    bool isFullColumnPresent()
+    {
+      for(int col = 0; col < 3; col++)
+      {
+        bool colfull = this->isColumnFull(col);
+        if(this->isColumnFull(col))
+          return true;
+      }
+      return false;
+    }
+
+     bool isColumnFull(int col)
+    {
+      if(this->game_board[0][col] == this->game_board[1][col] &&
+          this->game_board[1][col] == this->game_board[2][col] &&
+          this->game_board[0][col] != 0)
+        return true;
+      return false;
+    }
+
+    bool isFullDiagonalPresent()
+    {
+      if(this->game_board[0][0] == this->game_board[1][1] &&
+        this->game_board[1][1] == this->game_board[2][2] && 
+        this->game_board[0][0] != 0 )
+        return true;
+      if(this->game_board[2][0] == this->game_board[1][1] &&
+          this->game_board[1][1]== this->game_board[0][2] &&
+          this->game_board[2][0] != 0 )
+        return true;
+      return false;
+    }
+
 };
 
 class Game{
@@ -67,43 +94,88 @@ class Game{
       this->board = new Board();
     }
     
-    void startGame()
+    void presentCurrentMove(int i)
+    {
+      cout << "Aktualny ruch ";
+      if(i%2 == 0)
+        cout << "o";
+      else
+        cout << "x";
+      cout << endl;
+    }
+
+    int announceWinner(int i)
+    {
+      if(i%2 == 0)
+        cout << "Gratulacje! Wygralo kolko";
+      else
+        cout << "Gratulacje! Wygral krzyzyk";
+      return i%2 + 1;
+    }
+
+    int announceDraw()
+    {
+      cout << "Remis!";
+      return 0;
+    }
+
+    int runGame()
     {
       for(int i=0; i<9; i++)
       {
         this->board->showBoard();
         this->makeMove(i);
-        if(this->isGamefinished())
-          cout << "Koniec";
+        if(this->isGameWon())
+        {
+          this->board->showBoard();
+          return this->announceWinner(i);
+        }
       }
+      this->board->showBoard();
+      return this->announceDraw(); 
     }
 
+    bool isMoveValid(int x, int y)
+    { 
+      if(x > 2 || x < 0 || y > 2 || y < 0 )
+      {
+        cout << "Chyba sie pomyliłes! Wpisz poprawną wartosc";
+        return false;
+      }
+      if(this->board->game_board[x][y] != 0 )
+      {
+        cout << "Pole jest zajete!" << endl;
+        return false;
+      }
+      return true;
+    }
+    
     void makeMove(int i)
     {
         int x, y;
-        cout <<"Wpisz x: ";
-        cin >> x;
-        cout <<"Wpisz y: ";
-        cin >> y;
+        this->presentCurrentMove(i);
+        do
+        {
+          cout <<"Wpisz x: ";
+          cin >> x;
+          cout <<"Wpisz y: ";
+          cin >> y;
+        }while(!this->isMoveValid(x, y));
         this->board->setValue(x, y, i%2+1);
     }
 
-    bool isGamefinished()
+    bool isGameWon()
     {
       if(this->board->isFullColumnPresent()) return true;
+      if(this->board->isFullDiagonalPresent()) return true;
+      if(this->board->isFullRowPresent()) return true;
       return false;
-      // if((this->board->game_board[0][0]==this->board->game_board[0][1]==this->board->game_board[0][2]==1)||
-      // (this->board->game_board[0][0]==this->board->game_board[0][1]==this->board->game_board[0][2])==2)
-      //   return true;
-      // else
-      //   return false;
     }
 };
 
 int main() {
   Game* gameObject = new Game();
-  gameObject->startGame();
+  gameObject->runGame();
   int a;
   cin >> a;
-  return 0;
 }
