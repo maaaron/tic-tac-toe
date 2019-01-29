@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 class Board{
@@ -130,6 +131,7 @@ class Game{
           this->board->showBoard();
           return this->announceWinner(i);
         }
+        this->saveGame();
       }
       this->board->showBoard();
       return this->announceDraw(); 
@@ -171,11 +173,41 @@ class Game{
       if(this->board->isFullRowPresent()) return true;
       return false;
     }
+
+    void saveGame()
+     {
+        ofstream outfile ("load.txt");
+        for(int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                outfile << this->board->game_board[i][j];
+            }
+            outfile << endl;
+        }
+        outfile.close();
+     }
+
+     void loadGame(const char * path)
+     {
+       fstream plik;
+       plik.open ( path, ios::in );
+       string dane;
+       if( plik.good() == true )
+        {
+          for(int i = 0; i < 3; i++)
+          {  
+            getline( plik,dane);
+            cout << dane << endl;
+          }
+          plik.close();
+        }
+     }
 };
 
 int main() {
   Game* gameObject = new Game();
-  gameObject->runGame();
+  gameObject->loadGame("SavedGame1.txt");
+  //gameObject->saveGame();
+  //gameObject->runGame();
   int a;
   cin >> a;
 }
